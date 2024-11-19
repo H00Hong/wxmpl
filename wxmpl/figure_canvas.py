@@ -6,7 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.figure import Figure
 
-from .wxagg import FigureCanvasWxAgg, NavigationToolbar
+from .wxagg import FigureCanvasWxAgg, NavigationToolbar, mpl
 
 
 class wxFigureCanvas(wx.Panel):
@@ -112,7 +112,10 @@ class wxFigureCanvas(wx.Panel):
             ax.plot(*data, **item)
             ax.grid(ls='--', color='k', alpha=0.5)
             if 'label' in item:
-                ax.legend(loc='best', draggable=True)
+                if mpl.__version__ < (2, 2):
+                    ax.legend(loc='best')
+                else:
+                    ax.legend(loc='best', draggable=True)
         self.figure.tight_layout()
 
     def _on_press(self, event: MouseEvent) -> None:

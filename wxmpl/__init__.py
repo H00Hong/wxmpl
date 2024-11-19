@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .figure_canvas import wxFigureCanvas, Figure, Axes, wx
+from .figure_canvas import wxFigureCanvas, Figure, Axes, wx, mpl
 
 
 def wxmpl_gui(fig,

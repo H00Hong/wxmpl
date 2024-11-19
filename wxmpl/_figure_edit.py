@@ -1,6 +1,7 @@
 ﻿"""Figure Edit函数"""
 from itertools import chain
 
+import matplotlib as mpl
 from matplotlib import cm, colors as mcolors, markers, image as mimage
 from matplotlib.dates import DateConverter, num2date
 
@@ -233,12 +234,14 @@ def figure_edit(axes, parent=None):
         if generate_legend:
             draggable = None
             ncols = 1
+            _version = mpl.__version__ >= (2, 2)
             if axes.legend_ is not None:
                 old_legend = axes.get_legend()
-                draggable = old_legend._draggable is not None
+                if _version:
+                    draggable = old_legend._draggable is not None
                 ncols = old_legend._ncols
             new_legend = axes.legend(ncols=ncols)
-            if new_legend:
+            if new_legend and _version:
                 new_legend.set_draggable(draggable)
 
         # Redraw

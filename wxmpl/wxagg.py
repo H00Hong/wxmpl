@@ -1,6 +1,6 @@
 ﻿'''修改 backend_wx 渲染内核'''
 import wx
-from matplotlib import rc_context, rcParams
+import matplotlib as mpl
 from matplotlib.backend_bases import cursors, MouseEvent
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
 from matplotlib.backends.backend_wx import _api
@@ -72,7 +72,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             return
         # This import needs to happen here due to circular imports.
         from matplotlib.figure import Figure
-        with rc_context({'toolbar': 'none'}):  # No navbar for the toolfig.
+        with mpl.rc_context({'toolbar': 'none'}):  # No navbar for the toolfig.
             manager = type(self.canvas).new_manager(Figure(figsize=(6, 3)), -1)
         manager.set_window_title('Subplot configuration tool')
         tool_fig = manager.canvas.figure
