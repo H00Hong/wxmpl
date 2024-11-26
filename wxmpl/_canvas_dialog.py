@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 """窗口类"""
 from numbers import Integral, Real
-from typing import List, Tuple, Literal
+from typing import List, Literal, Tuple
 
 import wx
 from matplotlib.colors import Colormap

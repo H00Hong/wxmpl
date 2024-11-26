@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .figure_canvas import wxFigureCanvas, Figure, Axes, wx, mpl
+from .figure_canvas import Axes, Figure, mpl, wx, wxFigureCanvas
 
 
 def wxmpl_gui(fig,
@@ -28,7 +28,7 @@ def wxmpl_gui(fig,
     """
     app = wx.App()
     win = wx.Frame(None, wx.ID_ANY, title, size, style)
-    figcanvas = wxFigureCanvas(win, figure=fig, axes_shape=axes_shape)
+    wxFigureCanvas(win, figure=fig, axes_shape=axes_shape)
 
     win.Center()
     # figcanvas.Fit()

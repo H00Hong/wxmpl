@@ -2,23 +2,29 @@
 from itertools import chain
 
 import matplotlib as mpl
-from matplotlib import cm, colors as mcolors, markers, image as mimage
+from matplotlib import cm
+from matplotlib import colors as mcolors
+from matplotlib import image as mimage
+from matplotlib import markers
 from matplotlib.dates import DateConverter, num2date
 
 from ._canvas_dialog import ComboDialog, FormDialog
 
-LINESTYLES = {'-': 'Solid',
-              '--': 'Dashed',
-              '-.': 'DashDot',
-              ':': 'Dotted',
-              'None': 'None',
-              }
+LINESTYLES = {
+    '-': 'Solid',
+    '--': 'Dashed',
+    '-.': 'DashDot',
+    ':': 'Dotted',
+    'None': 'None',
+}
 
 DRAWSTYLES = {
     'default': 'Default',
-    'steps-pre': 'Steps (Pre)', 'steps': 'Steps (Pre)',
+    'steps-pre': 'Steps (Pre)',
+    'steps': 'Steps (Pre)',
     'steps-mid': 'Steps (Mid)',
-    'steps-post': 'Steps (Post)'}
+    'steps-post': 'Steps (Post)'
+}
 
 MARKERS = markers.MarkerStyle.markers
 
@@ -37,38 +43,28 @@ def figure_edit(axes, parent=None):
 
     axis_map = axes._axis_map
     axis_limits = {
-        name: tuple(convert_limits(
-            getattr(axes, f'get_{name}lim')(), axis.converter
-        ))
+        name:
+        tuple(convert_limits(
+            getattr(axes, f'get_{name}lim')(), axis.converter))
         for name, axis in axis_map.items()
     }
     general = [
         ('标题', axes.get_title()),
         sep,
-        *chain.from_iterable([
-            (
-                (None, f"<b>{name.title()}-轴</b>"),
-                ('最小值', axis_limits[name][0]),
-                ('最大值', axis_limits[name][1]),
-                ('名称', axis.get_label().get_text()),
-                ('轴尺度', [axis.get_scale(),
-                        'linear', 'log', 'symlog', 'logit']),
-                sep,
-            )
-            for name, axis in axis_map.items()
-        ]),
+        *chain.from_iterable([(
+            (None, f"<b>{name.title()}-轴</b>"),
+            ('最小值', axis_limits[name][0]),
+            ('最大值', axis_limits[name][1]),
+            ('名称', axis.get_label().get_text()),
+            ('轴尺度', [axis.get_scale(), 'linear', 'log', 'symlog', 'logit']),
+            sep,
+        ) for name, axis in axis_map.items()]),
         ('(Re-)生成自动图例', False),
     ]
 
     # Save the converter and unit data
-    axis_converter = {
-        name: axis.converter
-        for name, axis in axis_map.items()
-    }
-    axis_units = {
-        name: axis.get_units()
-        for name, axis in axis_map.items()
-    }
+    axis_converter = {name: axis.converter for name, axis in axis_map.items()}
+    axis_units = {name: axis.get_units() for name, axis in axis_map.items()}
 
     # Get / Curves
     labeled_lines = []
@@ -102,34 +98,27 @@ def figure_edit(axes, parent=None):
         # Find the kept shorthand for the style specified by init.
         canonical_init = name2short[d[init]]
         # Sort by representation and prepend the initial value.
-        return ([canonical_init] +
-                sorted(short2name.items(),
-                       key=lambda short_and_name: short_and_name[1]))
+        return ([canonical_init] + sorted(
+            short2name.items(), key=lambda short_and_name: short_and_name[1]))
 
     for label, line in labeled_lines:
-        color = mcolors.to_hex(
-            mcolors.to_rgba(line.get_color(), line.get_alpha()),
-            keep_alpha=True)
-        ec = mcolors.to_hex(
-            mcolors.to_rgba(line.get_markeredgecolor(), line.get_alpha()),
-            keep_alpha=True)
-        fc = mcolors.to_hex(
-            mcolors.to_rgba(line.get_markerfacecolor(), line.get_alpha()),
-            keep_alpha=True)
-        curvedata = [
-            ('名称', label),
-            sep,
-            (None, '<b>曲线</b>'),
-            ('线型', prepare_data(LINESTYLES, line.get_linestyle())),
-            ('绘图样式', prepare_data(DRAWSTYLES, line.get_drawstyle())),
-            ('线宽', line.get_linewidth()),
-            ('线颜色 (RGBA)', color),
-            sep,
-            (None, '<b>标签</b>'),
-            ('类型', prepare_data(MARKERS, line.get_marker())),
-            ('大小', line.get_markersize()),
-            ('填充颜色 (RGBA)', fc),
-            ('轮廓颜色 (RGBA)', ec)]
+        color = mcolors.to_hex(mcolors.to_rgba(line.get_color(),
+                                               line.get_alpha()),
+                               keep_alpha=True)
+        ec = mcolors.to_hex(mcolors.to_rgba(line.get_markeredgecolor(),
+                                            line.get_alpha()),
+                            keep_alpha=True)
+        fc = mcolors.to_hex(mcolors.to_rgba(line.get_markerfacecolor(),
+                                            line.get_alpha()),
+                            keep_alpha=True)
+        curvedata = [('名称', label), sep, (None, '<b>曲线</b>'),
+                     ('线型', prepare_data(LINESTYLES, line.get_linestyle())),
+                     ('绘图样式', prepare_data(DRAWSTYLES, line.get_drawstyle())),
+                     ('线宽', line.get_linewidth()), ('线颜色 (RGBA)', color), sep,
+                     (None, '<b>标签</b>'),
+                     ('类型', prepare_data(MARKERS, line.get_marker())),
+                     ('大小', line.get_markersize()), ('填充颜色 (RGBA)', fc),
+                     ('轮廓颜色 (RGBA)', ec)]
         curves.append([curvedata, label, ""])
     # Is there a curve displayed?
     has_curve = bool(curves)
@@ -155,11 +144,11 @@ def figure_edit(axes, parent=None):
             ('最大值', high),
         ]
         if hasattr(mappable, "get_interpolation"):  # Images.
-            interpolations = [
-                (name, name) for name in sorted(mimage.interpolations_names)]
-            mappabledata.append((
-                'Interpolation',
-                [mappable.get_interpolation(), *interpolations]))
+            interpolations = [(name, name)
+                              for name in sorted(mimage.interpolations_names)]
+            mappabledata.append(
+                ('Interpolation',
+                 [mappable.get_interpolation(), *interpolations]))
         mappables.append([mappabledata, label, ""])
     # Is there a scalarmappable displayed?
     has_sm = bool(mappables)
@@ -187,7 +176,8 @@ def figure_edit(axes, parent=None):
         axes.set_title(title)
 
         for i, (name, axis) in enumerate(axis_map.items()):
-            axis_min, axis_max, axis_label, axis_scale = general[i*4:i*4+4]
+            axis_min, axis_max, axis_label, axis_scale = general[i * 4:i * 4 +
+                                                                 4]
             if axis.get_scale() != axis_scale:
                 getattr(axes, f"set_{name}scale")(axis_scale)
 
@@ -203,9 +193,9 @@ def figure_edit(axes, parent=None):
             line = labeled_lines[index][1]
             (label, linestyle, drawstyle, linewidth, color, marker, markersize,
              markerfacecolor, markeredgecolor) = curve
-            
-            line.set_label(label) # 
-            
+
+            line.set_label(label)
+
             line.set_linestyle(linestyle)
             line.set_drawstyle(drawstyle)
             line.set_linewidth(linewidth)
@@ -251,10 +241,11 @@ def figure_edit(axes, parent=None):
             if getattr(axes, f"get_{name}lim")() != orig_limits[name]:
                 figure.canvas.toolbar.push_current()
                 break
-    
-    dialog = FormDialog(datalist, title="图窗选项", parent=parent, apply=apply_callback)
+
+    dialog = FormDialog(datalist,
+                        title="图窗选项",
+                        parent=parent,
+                        apply=apply_callback)
     dialog.ShowModal()
     # if dialog.ShowModal() != wx.ID_OK:
     #     return
-    
-

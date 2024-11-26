@@ -1,14 +1,16 @@
 ﻿'''修改 backend_wx 渲染内核'''
-import wx
 import matplotlib as mpl
-from matplotlib.backend_bases import cursors, MouseEvent
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
+import wx
+from matplotlib.backend_bases import MouseEvent, cursors
 from matplotlib.backends.backend_wx import _api
-from matplotlib.widgets import SubplotTool, Button
+from matplotlib.backends.backend_wxagg import (FigureCanvasWxAgg,
+                                               NavigationToolbar2WxAgg)
+from matplotlib.widgets import Button, SubplotTool
 
-from ._figure_edit import figure_edit, ComboDialog
+from ._figure_edit import ComboDialog, figure_edit
 
-class SubplotTool(SubplotTool): # 增加按钮 tight_layout
+
+class SubplotTool(SubplotTool):  # 增加按钮 tight_layout
     def __init__(self, targetfig, toolfig):
         super().__init__(targetfig, toolfig)
         self.buttontight = Button(toolfig.add_axes([0.575, 0.05, 0.2, 0.075]), 'Tight Layout')
@@ -24,7 +26,7 @@ class SubplotTool(SubplotTool): # 增加按钮 tight_layout
 
 
 # matplotlib.backends.backend_wx._FigureCanvasWxBase.set_cursor 763 cursors.MOVE: wx.CURSOR_SIZING,
-class FigureCanvasWxAgg(FigureCanvasWxAgg): # 修改鼠标样式
+class FigureCanvasWxAgg(FigureCanvasWxAgg):  # 修改鼠标样式
 
     def set_cursor(self, cursor):
         # docstring inherited
@@ -66,7 +68,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             self._label_text.SetLabel('(x=-0.000 y=-0.000)')
             self.Realize()
 
-    def configure_subplots(self, *args): # 替换 SubplotTool 增加tight_layout按钮
+    def configure_subplots(self, *args):  # 替换 SubplotTool 增加tight_layout按钮
         if hasattr(self, 'subplot_tool'):
             self.subplot_tool.figure.canvas.manager.show()
             return
@@ -86,7 +88,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         manager.show()
         return self.subplot_tool
 
-    def set_message(self, s:str): # 根据str的长度是否刷新
+    def set_message(self, s:str):  # 根据str的长度是否刷新
         if self._coordinates:
             s0 = len(s)
             self._label_text.SetLabel(s)
@@ -94,7 +96,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
                 self.Realize()
                 self._s0 = s0
 
-    def do_scrollZoom(self, event: MouseEvent): # 鼠标滚轮缩放
+    def do_scrollZoom(self, event: MouseEvent):  # 鼠标滚轮缩放
         if self._on_scroll:
             # print('do_scrollZoom')
             ax = event.inaxes  # 产生事件axes对象
@@ -116,7 +118,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         super().pan(event)
         self._on_scroll = not self._on_scroll
 
-    def edit_parameters(self, event): # 增加视图选择窗口
+    def edit_parameters(self, event):  # 增加视图选择窗口
         axes = self.canvas.figure.get_axes()
         if not axes:
             wx.MessageBox('There are no Axes to edit.', 'Error', wx.OK | wx.ICON_ERROR)

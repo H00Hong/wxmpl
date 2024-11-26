@@ -1,7 +1,8 @@
 ﻿"""wxFigureCanvas"""
 from typing import Optional, Tuple
 
-import wx, numpy as np
+import numpy as np
+import wx
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.figure import Figure
@@ -39,11 +40,13 @@ class wxFigureCanvas(wx.Panel):
                 if axes_shape:
                     self.axes = self.axes.reshape(axes_shape)
                 else:
-                    num_rows = len(set(ax.get_position().bounds[1] for ax in axes))
-                    num_cols = len(set(ax.get_position().bounds[0] for ax in axes))
+                    num_rows = len(
+                        set(ax.get_position().bounds[1] for ax in axes))
+                    num_cols = len(
+                        set(ax.get_position().bounds[0] for ax in axes))
                     try:
                         self.axes.reshape((num_rows, num_cols))
-                    except:
+                    except Exception:
                         pass
 
         self.canvas = FigureCanvasWxAgg(self, wx.ID_ANY, self.figure)
