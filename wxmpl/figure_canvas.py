@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from .wxagg import FigureCanvasWxAgg, NavigationToolbar, mpl
 
 
-class wxFigureCanvas(wx.Panel):
+class FigureCanvas(wx.Panel):
 
     def __init__(
         self,
@@ -19,7 +19,7 @@ class wxFigureCanvas(wx.Panel):
         pos=wx.DefaultPosition,
         size=wx.DefaultSize,
         style=wx.TAB_TRAVERSAL,
-        name='wxFigureCanvas',
+        name='wxPythonFigureCanvas',
         data: Optional[Tuple[dict, ...]] = None,
         figure: Optional[Figure] = None,
         axes_shape: tuple = ()) -> None:

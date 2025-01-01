@@ -88,7 +88,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         manager.show()
         return self.subplot_tool
 
-    def set_message(self, s:str):  # 根据str的长度是否刷新
+    def set_message(self, s: str):  # 根据str的长度是否刷新
         if self._coordinates:
             s0 = len(s)
             self._label_text.SetLabel(s)
