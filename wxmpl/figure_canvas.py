@@ -100,8 +100,7 @@ class FigureCanvas(wx.Panel):
 
         for i in dat:
             item = i.copy()
-            ax = self.axes[tuple(
-                item.pop('ax_shape'))] if 'ax_shape' in item else self.axes
+            ax: Axes = self.axes[tuple(item.pop('ax_shape'))] if 'ax_shape' in item else self.axes[0]  # type: ignore
 
             if 'data' in item:
                 data = [item.pop('data')]
@@ -115,7 +114,7 @@ class FigureCanvas(wx.Panel):
             ax.plot(*data, **item)
             ax.grid(ls='--', color='k', alpha=0.5)
             if 'label' in item:
-                if mpl.__version__ < (2, 2):
+                if mpl.__version_info__ < (2, 2):
                     ax.legend(loc='best')
                 else:
                     ax.legend(loc='best', draggable=True)

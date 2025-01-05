@@ -224,7 +224,7 @@ def figure_edit(axes, parent=None):
         if generate_legend:
             draggable = None
             ncols = 1
-            _version = mpl.__version__ >= (2, 2)
+            _version = mpl.__version_info__ >= (2, 2)
             if axes.legend_ is not None:
                 old_legend = axes.get_legend()
                 if _version:

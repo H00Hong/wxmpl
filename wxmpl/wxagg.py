@@ -13,7 +13,7 @@ from ._figure_edit import ComboDialog, figure_edit
 class SubplotTool(SubplotTool):  # 增加按钮 tight_layout
     def __init__(self, targetfig, toolfig):
         super().__init__(targetfig, toolfig)
-        self.buttontight = Button(toolfig.add_axes([0.575, 0.05, 0.2, 0.075]), 'Tight Layout')
+        self.buttontight = Button(toolfig.add_axes((0.575, 0.05, 0.2, 0.075)), 'Tight Layout')
         self.buttontight.on_clicked(self._on_tight_layout)
         # toolfig.suptitle('点击滑块调整子图参数')
         
@@ -138,7 +138,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
                 title for title in titles if titles.count(title) > 1]
             for i, ax in enumerate(axes):
                 if titles[i] in duplicate_titles:
-                    titles[i] += f' (id: {id(ax):#x})'  # Deduplicate titles.
+                    titles[i] += f' (id: {id(ax):#x})'  # type: ignore # Deduplicate titles.
             choice = ComboDialog(self, 'Customize', 'Select Axes:', titles)
             if choice.ShowModal() != wx.ID_OK:
                 return
