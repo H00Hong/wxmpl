@@ -23,10 +23,34 @@ class FigureCanvas(wx.Panel):
         data: Optional[Tuple[dict, ...]] = None,
         figure: Optional[Figure] = None,
         axes_shape: tuple = ()) -> None:
+        """
+        FigureCanvas for wxPython based on matplotlib.
+
+        Parameters
+        ----------
+        parent : `wx.Window`
+            The parent window.
+        id : int
+            The id of the window.
+        pos : `wx.Point` or tuple
+            The position of the window.
+        size : `wx.Size` or tuple
+            The size of the window.
+        style : int
+            The style of the window.
+        name : str
+            The name of the window.
+        data : Tuple[dict, ...], optional
+            The data to plot.
+        figure : Figure, optional
+            The figure to plot.
+        axes_shape : tuple, optional
+            The shape of the axes.
+        """
         super().__init__(parent, id, pos, size, style, name)
 
         if figure is None:
-            self.figure = Figure(dpi=100)
+            self.figure = Figure(dpi=96)
             self.axes = None
             assert data is not None
             self._plot(data)
@@ -37,17 +61,16 @@ class FigureCanvas(wx.Panel):
                 self.axes = axes[0]
             else:
                 self.axes = np.asarray(axes, object)
-                if axes_shape:
-                    self.axes = self.axes.reshape(axes_shape)
-                else:
+                if not axes_shape:
                     num_rows = len(
                         set(ax.get_position().bounds[1] for ax in axes))
                     num_cols = len(
                         set(ax.get_position().bounds[0] for ax in axes))
-                    try:
-                        self.axes.reshape((num_rows, num_cols))
-                    except Exception:
-                        pass
+                    axes_shape = (num_rows, num_cols)
+                try:
+                    self.axes = self.axes.reshape(axes_shape)
+                except:
+                    pass
 
         self.canvas = FigureCanvasWxAgg(self, wx.ID_ANY, self.figure)
         self.toolbar = NavigationToolbar(self.canvas)
