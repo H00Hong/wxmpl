@@ -1,4 +1,5 @@
 ﻿"""修改 backend_wx 渲染内核"""
+import os.path
 import base64
 import io
 import matplotlib as mpl
@@ -12,8 +13,7 @@ from matplotlib.widgets import Button, SubplotTool
 
 from ._figure_edit import ComboDialog, figure_edit
 
-ico_square = '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'
-
+ico_143846 = "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"
 
 class SubplotTool(SubplotTool):  # 增加按钮 tight_layout
     def __init__(self, targetfig, toolfig):
@@ -79,35 +79,40 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         if self._coordinates:
             self._label_text.SetLabel('(x=-0.000 y=-0.000)')
 
-        image_data = base64.b64decode(ico_square)
+        image_data = base64.b64decode(ico_143846)
         stream = io.BytesIO(image_data)
-        # toolbarIconSize = wx.ArtProvider().GetDIPSizeHint(wx.ART_TOOLBAR)
-        image = wx.Image(stream, wx.BITMAP_TYPE_ANY).Scale(32, 32)
+        image = wx.Image(stream, wx.BITMAP_TYPE_ANY).Scale(32,32)
         self.wx_ids['DataLabel'] = (
                 self.InsertTool(
-                    len(self.toolitems)-1,
+                    len(self.toolitems)-2,
                     -1,
-                    label='DataLabel', 
-                    bitmap=wx.Bitmap(image),
+                    label='DataLabel',
+                    bitmap=self._load_datalabel_svg(),
                     bmpDisabled=wx.NullBitmap,
-                    shortHelp='Data label button',
+                    shortHelp='Displays data labels near the mouse',
                     kind=wx.ITEM_CHECK).Id)
         self.Bind(wx.EVT_TOOL, self.on_datalabel,
                   id=self.wx_ids['DataLabel'])
         self.Realize()
 
-    # def _icon(self, name):
-    #     try:
-    #         return super()._icon(name)
-    #     except FileNotFoundError:
-    #         if name == 'datalabel.svg':
-    #             image_data = base64.b64decode(ico_square)
-    #             stream = io.BytesIO(image_data)
-    #             toolbarIconSize = wx.ArtProvider().GetDIPSizeHint(
-    #                 wx.ART_TOOLBAR)
-    #             image = wx.Image(stream, wx.BITMAP_TYPE_ANY).Scale(
-    #                 toolbarIconSize.x, toolbarIconSize.y)
-    #             return wx.Bitmap(image)
+    def _load_datalabel_svg(self):
+        try:
+            dark = wx.SystemSettings.GetAppearance().IsDark()
+        except AttributeError:  # wxpython < 4.1
+            # copied from wx's IsUsingDarkBackground / GetLuminance.
+            bg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW)
+            fg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT)
+            # See wx.Colour.GetLuminance.
+            bg_lum = (.299 * bg.red + .587 * bg.green + .114 * bg.blue) / 255
+            fg_lum = (.299 * fg.red + .587 * fg.green + .114 * fg.blue) / 255
+            dark = fg_lum - bg_lum > .2
+
+        with open(os.path.join(os.path.dirname(__file__), '143846.svg'), 'rb') as f:
+            svg = f.read()
+        if dark:
+            svg = svg.replace(b'fill:black;', b'fill:white;')
+        toolbarIconSize = wx.ArtProvider().GetDIPSizeHint(wx.ART_TOOLBAR)
+        return wx.BitmapBundle.FromSVG(svg, toolbarIconSize)
 
     def configure_subplots(self, *args):  # 替换 SubplotTool 增加tight_layout按钮
         if hasattr(self, 'subplot_tool'):
@@ -177,8 +182,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
                     if contains:
                         if self._annotation is None:
                             self._init_annotation(ax)
-                        elif self._old_annotation_info[-1] != id(ax):
-                            print(self._old_annotation_info[-1])
+                        elif self._old_annotation_info[-1] != id(ax) and self._annotation_visible:
                             self._annotation.set_visible(False)
                             self._init_annotation(ax)
                         self._annotation.set_visible(False)
@@ -188,10 +192,10 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
     def _init_annotation(self, ax: plt.Axes):
         self._annotation = ax.annotate('',
                                        xy=(0, 0),
-                                       xytext=(20, 20),
+                                       xytext=(20, 10),
                                        textcoords='offset points',
                                        arrowprops=dict(arrowstyle='->'),
-                                       bbox=dict(boxstyle='round', fc='w'))
+                                       bbox=dict(boxstyle='round', fc='w', alpha=0.5))
 
     def update_annotation(self, ind: int, l: plt.Line2D, ax: plt.Axes):
         if not self._annotation_visible:
@@ -203,6 +207,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         line_label = l.get_label()
         ax_title = ax.get_title()
         text = f'Axes: {ax_title}\nLine: {line_label}\nPt.   (x: {x:.6f},\n        y: {y:.6f})\nPtInd {ind}'
+
         self._annotation.set_text(text)
         self._annotation.xy = (x, y)
         self._annotation.set_visible(True)

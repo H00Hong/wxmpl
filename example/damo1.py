@@ -18,16 +18,16 @@ class MainWin(wx.Frame):
         self.canvas = FigureCanvas(self, figure=fig)
         # self.canvas.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
-        btn = wx.Button(self, label='data')
-        self.Bind(wx.EVT_BUTTON, self.on_btn_click, btn)
         self._annotation = None
         self._annotation_visible = False
         self._old_annotation_info = (None, None)
         # self._annotation.set_visible(self._annotation_visible)
-        layout = wx.BoxSizer(wx.VERTICAL)
-        layout.Add(self.canvas, 1, wx.EXPAND)
-        layout.Add(btn, 0, wx.ALL|wx.EXPAND, 5)
-        self.SetSizer(layout)
+        # btn = wx.Button(self, label='data')
+        # self.Bind(wx.EVT_BUTTON, self.on_btn_click, btn)
+        # layout = wx.BoxSizer(wx.VERTICAL)
+        # layout.Add(self.canvas, 1, wx.EXPAND)
+        # layout.Add(btn, 0, wx.ALL|wx.EXPAND, 5)
+        # self.SetSizer(layout)
 
     def on_motion(self, event):
         # print(type(event))
