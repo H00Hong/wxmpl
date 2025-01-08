@@ -1,7 +1,6 @@
 ﻿"""修改 backend_wx 渲染内核"""
 import os.path
-import base64
-import io
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import wx
@@ -13,7 +12,6 @@ from matplotlib.widgets import Button, SubplotTool
 
 from ._figure_edit import ComboDialog, figure_edit
 
-ico_143846 = "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"
 
 class SubplotTool(SubplotTool):  # 增加按钮 tight_layout
     def __init__(self, targetfig, toolfig):
@@ -79,9 +77,6 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         if self._coordinates:
             self._label_text.SetLabel('(x=-0.000 y=-0.000)')
 
-        image_data = base64.b64decode(ico_143846)
-        stream = io.BytesIO(image_data)
-        image = wx.Image(stream, wx.BITMAP_TYPE_ANY).Scale(32,32)
         self.wx_ids['DataLabel'] = (
                 self.InsertTool(
                     len(self.toolitems)-2,
@@ -107,7 +102,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             fg_lum = (.299 * fg.red + .587 * fg.green + .114 * fg.blue) / 255
             dark = fg_lum - bg_lum > .2
 
-        with open(os.path.join(os.path.dirname(__file__), '143846.svg'), 'rb') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'datalabel.svg'), 'rb') as f:
             svg = f.read()
         if dark:
             svg = svg.replace(b'fill:black;', b'fill:white;')

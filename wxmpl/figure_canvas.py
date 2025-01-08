@@ -60,7 +60,6 @@ class FigureCanvas(wx.Panel):
             if len(axes) == 1:
                 self.axes = axes[0]
             else:
-                self.axes = np.asarray(axes, object)
                 if not axes_shape:
                     num_rows = len(
                         set(ax.get_position().bounds[1] for ax in axes))
@@ -68,9 +67,9 @@ class FigureCanvas(wx.Panel):
                         set(ax.get_position().bounds[0] for ax in axes))
                     axes_shape = (num_rows, num_cols)
                 try:
-                    self.axes = self.axes.reshape(axes_shape)
+                    self.axes = np.asarray(axes, object).reshape(axes_shape)
                 except:
-                    pass
+                    self.axes = np.asarray(axes, object)
 
         self.canvas = FigureCanvasWxAgg(self, wx.ID_ANY, self.figure)
         self.toolbar = NavigationToolbar(self.canvas)
@@ -87,6 +86,12 @@ class FigureCanvas(wx.Panel):
 
     def redraw(self) -> None:
         self.canvas.draw()
+
+    def redraw_idle(self) -> None:
+        self.canvas.draw_idle()
+
+    def set_cursor(self, cursor) -> None:
+        self.canvas.SetCursor(cursor)
 
     def Refresh(self, eraseBackground=True, rect=None):
         self.redraw()
