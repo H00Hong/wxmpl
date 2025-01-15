@@ -116,26 +116,25 @@ class FigureCanvas(wx.Panel):
 
     def _plot(self, dat: Tuple[dict, ...]) -> None:
         if self.axes is None:
-            if 'ax_shape' not in dat[0]:
+            ax_shape = [i.get('ax_shape') for i in dat]
+            if None in ax_shape:
+                if ax_shape.count(None) != len(ax_shape):
+                    raise ValueError('All axes must have shape information.')
                 self.axes = self.figure.add_subplot()
             else:
-                tup = tuple([0] * len(dat[0]['ax_shape']))
-                for i in dat:
-                    tup0 = tuple(i['ax_shape'])
-                    if tup0 > tup:
-                        tup = tup0
-                self.axes = self.figure.add_subplot(*tup)
+                tup = max(map(tuple, ax_shape))
+                self.axes = self.figure.subplots(*tup)
 
         for i in dat:
             item = i.copy()
-            ax: Axes = self.axes[tuple(item.pop('ax_shape'))] if 'ax_shape' in item else self.axes[0]  # type: ignore
+            ax: Axes = self.axes[tuple(item.pop('ax_shape'))] if 'ax_shape' in item else self.axes  # type: ignore
 
             if 'data' in item:
                 data = [item.pop('data')]
             elif 'x' in item and 'y' in item:
                 data = [item.pop('x'), item.pop('y')]
             else:
-                raise ValueError('data not in item')
+                raise ValueError('No mapping data found.')
             if 'fmt' in item:
                 data.append(item.pop('fmt'))
 
