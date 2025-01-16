@@ -49,7 +49,6 @@ class FigureCanvasWxAgg(FigureCanvasWxAgg):  # 修改鼠标样式
         self.Refresh()
 
 
-# matplotlib.backends.backend_wx.NavigationToolbar2Wx.__init__ 1100 label=' '*27
 class NavigationToolbar(NavigationToolbar2WxAgg):
 
     toolitems = [*NavigationToolbar2WxAgg.toolitems]
@@ -70,7 +69,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
                                                 style=style)
         self._id_scroll = self.canvas.mpl_connect('scroll_event', self.do_scrollZoom)
         self._on_scroll = False
-        self._s0 = 19
+        self._slen0 = 19
         self._annotation = None
         self._annotation_visible = False
         self._old_annotation_info = (None, None, None)
@@ -131,11 +130,11 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
 
     def set_message(self, s: str):  # 根据str的长度是否刷新
         if self._coordinates:
-            s0 = len(s)
+            slen0 = len(s)
             self._label_text.SetLabel(s)
-            if s0 > self._s0:
+            if slen0 > self._slen0:
                 self.Realize()
-                self._s0 = s0
+                self._slen0 = slen0
 
     def do_scrollZoom(self, event: MouseEvent):  # 鼠标滚轮缩放
         if self._on_scroll:
@@ -190,7 +189,8 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
                                        xytext=(20, 10),
                                        textcoords='offset points',
                                        arrowprops=dict(arrowstyle='->'),
-                                       bbox=dict(boxstyle='round', fc='w', alpha=0.5))
+                                       bbox=dict(boxstyle='round', fc='w', alpha=0.5),
+                                       annotation_clip=False)
 
     def update_annotation(self, ind: int, l: plt.Line2D, ax: plt.Axes):
         if not self._annotation_visible:
@@ -199,15 +199,35 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             return
         x = l.get_xdata()[ind]
         y = l.get_ydata()[ind]
-        line_label = l.get_label()
-        ax_title = ax.get_title()
-        text = f'Axes: {ax_title}\nLine: {line_label}\nPt.   (x: {x:.6f},\n        y: {y:.6f})\nPtInd {ind}'
+        text = f'Axes: {ax.get_title()}\nLine: {l.get_label()}\n\
+Pt.   (x: {x.round(6)},\n        y: {y.round(6)})\nPtInd. {ind}'
 
+        self._annotation.set_position((20, 10))
         self._annotation.set_text(text)
         self._annotation.xy = (x, y)
         self._annotation.set_visible(True)
+        contains = self._check_contains_bbox(ax)
+        if not contains:
+            bbox = self._annotation.get_window_extent(renderer=self.canvas.get_renderer())
+            len_ = - int(70 / bbox.height * bbox.width)
+            for xy in ((len_, 10), (len_, -70), (20, -70)):
+                self._annotation.set_position(xy)
+                contains = self._check_contains_bbox(ax)
+                if contains:
+                    break
+            if not contains:
+                self._annotation.set_position((20, 10))
+                print('Annotation is outside the axes bounds.')
         self._old_annotation_info = (ind, id(l), id(ax))
-        self.canvas.draw_idle()
+        self.canvas.draw()
+
+    def _check_contains_bbox(self, ax: plt.Axes) -> bool:
+        # 获取注释的边界框
+        bbox = self._annotation.get_window_extent(renderer=self.canvas.get_renderer())
+        # 检查边界框是否在轴范围内
+        contains_point0 = ax.contains_point((bbox.x0, bbox.y0))
+        contains_point1 = ax.contains_point((bbox.x1, bbox.y1))
+        return contains_point0 and contains_point1
 
     def edit_parameters(self, event):  # 增加视图选择窗口
         axes = self.canvas.figure.get_axes()

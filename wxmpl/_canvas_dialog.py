@@ -4,6 +4,7 @@ from numbers import Integral, Real
 from typing import List, Literal, Tuple
 
 import wx
+from matplotlib import cbook
 from matplotlib.colors import Colormap
 
 FONT = (12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
@@ -312,7 +313,13 @@ class FormDialog(wx.Dialog):  # 表单对话框
         super(FormDialog, self).__init__(parent,
                                          title=title,
                                          size=(440, 700),
-                                         style=wx.RESIZE_BORDER)
+                                         style=wx.CAPTION | wx.CLOSE_BOX
+                                         | wx.RESIZE_BORDER)
+        path = cbook._get_data_path('images', 'matplotlib.svg')
+        svg = path.read_bytes()
+        iconsize = wx.ArtProvider().GetDIPSizeHint(wx.ART_TOOLBAR)
+        bmp = wx.BitmapBundle.FromSVG(svg, iconsize)
+        self.SetIcon(bmp.GetIcon(iconsize))
         self.SetMinSize((440, 640))
         self._data: List[Tuple[list, str, str]] = data
         self.apply_callback = apply
