@@ -324,8 +324,7 @@ class FormDialog(wx.Dialog):  # 表单对话框
         self._data: List[Tuple[list, str, str]] = data
         self.apply_callback = apply
 
-        self._font = wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
-                             wx.FONTWEIGHT_NORMAL, False, 'Microsoft Yahei')
+        self._font = wx.Font(*FONT)
         self.layout0 = wx.BoxSizer(wx.VERTICAL)
 
         self._set_notebook()
