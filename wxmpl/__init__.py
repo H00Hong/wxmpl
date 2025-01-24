@@ -42,6 +42,6 @@ def wxmpl_gui(
 
 
 __all__ = ['wxmpl_gui', 'FigureCanvas']
-__version_info__ = (0, 1, 0)
+__version_info__ = (0, 1, 1)
 __version__ = '.'.join(map(str, __version_info__))
-__updated__ = '2025-1-16'
+__updated__ = '2025-1-24'

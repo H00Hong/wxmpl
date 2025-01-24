@@ -7,8 +7,7 @@ import wx
 from matplotlib import cbook
 from matplotlib.colors import Colormap
 
-FONT = (12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL,
-        False, 'Microsoft Yahei')
+FONTINFO: wx.FontInfo = wx.FontInfo(12).FaceName('Microsoft Yahei')
 
 
 class ComboDialog(wx.Dialog):  # 选择视图
@@ -16,7 +15,7 @@ class ComboDialog(wx.Dialog):  # 选择视图
     def __init__(self, parent, title, lab, lst):
         super(ComboDialog, self).__init__(parent, title=title, size=(300, 200))
 
-        font = wx.Font(*FONT)
+        font = wx.Font(FONTINFO)
         label = wx.StaticText(self, label=lab)
         self.choice = wx.Choice(self, choices=lst)
         self.choice.SetSelection(0)
@@ -105,7 +104,7 @@ class LineLabel(wx.Panel):
         self.SetSizer(sizer)
 
     def set_font(self):
-        font = wx.Font(*FONT)
+        font = wx.Font(FONTINFO)
         self.SetFont(font)
         for i in self._widgets:
             i.SetFont(font)
@@ -324,7 +323,7 @@ class FormDialog(wx.Dialog):  # 表单对话框
         self._data: List[Tuple[list, str, str]] = data
         self.apply_callback = apply
 
-        self._font = wx.Font(*FONT)
+        self._font = wx.Font(FONTINFO)
         self.layout0 = wx.BoxSizer(wx.VERTICAL)
 
         self._set_notebook()

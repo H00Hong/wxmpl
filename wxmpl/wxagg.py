@@ -28,7 +28,6 @@ class SubplotTool(SubplotTool):  # 增加按钮 tight_layout
         #     print(getattr(self.targetfig.subplotpars, name))
 
 
-# matplotlib.backends.backend_wx._FigureCanvasWxBase.set_cursor 763 cursors.MOVE: wx.CURSOR_SIZING,
 class FigureCanvasWxAgg(FigureCanvasWxAgg):  # 修改鼠标样式
 
     def set_cursor(self, cursor):
@@ -36,7 +35,7 @@ class FigureCanvasWxAgg(FigureCanvasWxAgg):  # 修改鼠标样式
         cursor = wx.Cursor(
             _api.check_getitem(
                 {
-                    cursors.MOVE: wx.CURSOR_SIZING,
+                    cursors.MOVE: wx.CURSOR_SIZING,  # 修改
                     cursors.HAND: wx.CURSOR_HAND,
                     cursors.POINTER: wx.CURSOR_ARROW,
                     cursors.SELECT_REGION: wx.CURSOR_CROSS,
