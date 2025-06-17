@@ -7,26 +7,9 @@ from matplotlib import colors as mcolors
 from matplotlib import image as mimage
 from matplotlib import markers
 from matplotlib.dates import DateConverter, num2date
+from matplotlib.backends.qt_editor.figureoptions import LINESTYLES, DRAWSTYLES, MARKERS
 
 from ._canvas_dialog import ComboDialog, FormDialog
-
-LINESTYLES = {
-    '-': 'Solid',
-    '--': 'Dashed',
-    '-.': 'DashDot',
-    ':': 'Dotted',
-    'None': 'None',
-}
-
-DRAWSTYLES = {
-    'default': 'Default',
-    'steps-pre': 'Steps (Pre)',
-    'steps': 'Steps (Pre)',
-    'steps-mid': 'Steps (Mid)',
-    'steps-post': 'Steps (Post)'
-}
-
-MARKERS = markers.MarkerStyle.markers
 
 
 def figure_edit(axes, parent=None):
@@ -49,17 +32,17 @@ def figure_edit(axes, parent=None):
         for name, axis in axis_map.items()
     }
     general = [
-        ('标题', axes.get_title()),
+        ('Title', axes.get_title()),
         sep,
         *chain.from_iterable([(
-            (None, f"<b>{name.title()}-轴</b>"),
-            ('最小值', axis_limits[name][0]),
-            ('最大值', axis_limits[name][1]),
-            ('名称', axis.get_label().get_text()),
-            ('轴尺度', [axis.get_scale(), 'linear', 'log', 'symlog', 'logit']),
+            (None, f"<b>{name.title()}-Axis</b>"),
+            ('Min', axis_limits[name][0]),
+            ('Max', axis_limits[name][1]),
+            ('Label', axis.get_label().get_text()),
+            ('Scale', [axis.get_scale(), 'linear', 'log', 'symlog', 'logit']),
             sep,
         ) for name, axis in axis_map.items()]),
-        ('(Re-)生成自动图例', False),
+        ('(Re-)Generate automatic legend', False),
     ]
 
     # Save the converter and unit data
@@ -111,14 +94,20 @@ def figure_edit(axes, parent=None):
         fc = mcolors.to_hex(mcolors.to_rgba(line.get_markerfacecolor(),
                                             line.get_alpha()),
                             keep_alpha=True)
-        curvedata = [('名称', label), sep, (None, '<b>曲线</b>'),
-                     ('线型', prepare_data(LINESTYLES, line.get_linestyle())),
-                     ('绘图样式', prepare_data(DRAWSTYLES, line.get_drawstyle())),
-                     ('线宽', line.get_linewidth()), ('线颜色 (RGBA)', color), sep,
-                     (None, '<b>标签</b>'),
-                     ('类型', prepare_data(MARKERS, line.get_marker())),
-                     ('大小', line.get_markersize()), ('填充颜色 (RGBA)', fc),
-                     ('轮廓颜色 (RGBA)', ec)]
+        curvedata = [
+            ('Label', label),
+            sep,
+            (None, '<b>Line</b>'),
+            ('Line style', prepare_data(LINESTYLES, line.get_linestyle())),
+            ('Draw style', prepare_data(DRAWSTYLES, line.get_drawstyle())),
+            ('Width', line.get_linewidth()),
+            ('Color (RGBA)', color),
+            sep,
+            (None, '<b>Marker</b>'),
+            ('Style', prepare_data(MARKERS, line.get_marker())),
+            ('Size', line.get_markersize()),
+            ('Face color (RGBA)', fc),
+            ('Edge color (RGBA)', ec)]
         curves.append([curvedata, label, ""])
     # Is there a curve displayed?
     has_curve = bool(curves)
@@ -138,10 +127,10 @@ def figure_edit(axes, parent=None):
             cmaps = [(cmap, cmap.name), *cmaps]
         low, high = mappable.get_clim()
         mappabledata = [
-            ('标签', label),
-            ('颜色图', [cmap.name] + cmaps),
-            ('最小值', low),
-            ('最大值', high),
+            ('Label', label),
+            ('Colormap', [cmap.name] + cmaps),
+            ('Min. value', low),
+            ('Max. value', high),
         ]
         if hasattr(mappable, "get_interpolation"):  # Images.
             interpolations = [(name, name)
@@ -153,11 +142,11 @@ def figure_edit(axes, parent=None):
     # Is there a scalarmappable displayed?
     has_sm = bool(mappables)
 
-    datalist = [(general, "坐标轴", "")]
+    datalist = [(general, "Axes", "")]
     if curves:
-        datalist.append((curves, "曲线", ""))
+        datalist.append((curves, "Curves", ""))
     if mappables:
-        datalist.append((mappables, "图像, 等.", ""))
+        datalist.append((mappables, "Images, etc.", ""))
 
     def apply_callback(data):
         """用于应用更改的回调"""
@@ -193,9 +182,7 @@ def figure_edit(axes, parent=None):
             line = labeled_lines[index][1]
             (label, linestyle, drawstyle, linewidth, color, marker, markersize,
              markerfacecolor, markeredgecolor) = curve
-
             line.set_label(label)
-
             line.set_linestyle(linestyle)
             line.set_drawstyle(drawstyle)
             line.set_linewidth(linewidth)
@@ -243,7 +230,7 @@ def figure_edit(axes, parent=None):
                 break
 
     dialog = FormDialog(datalist,
-                        title="图窗选项",
+                        title="Figure options",
                         parent=parent,
                         apply=apply_callback)
     dialog.ShowModal()

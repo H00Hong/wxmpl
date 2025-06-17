@@ -151,7 +151,7 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             ychg = ratio * (ymax - ymin)
             ax.set_xbound(xmin + xchg, xmax - xchg)
             ax.set_ybound(ymin + ychg, ymax - ychg)
-            self.canvas.draw()
+            self.canvas.draw_idle()
 
     def pan(self, event: MouseEvent):
         super().pan(event)
