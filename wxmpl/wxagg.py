@@ -1,11 +1,13 @@
 ﻿"""修改 backend_wx 渲染内核"""
-import os.path
+from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import PIL.Image
 import wx
 from matplotlib.backend_bases import MouseEvent, cursors
-from matplotlib.backends.backend_wx import _api
+from matplotlib.backends.backend_wx import _api, cbook
 from matplotlib.backends.backend_wxagg import (FigureCanvasWxAgg,
                                                NavigationToolbar2WxAgg)
 from matplotlib.widgets import Button, SubplotTool
@@ -56,39 +58,78 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
         [name for name, *_ in toolitems].index('Subplots') + 1,
         ('Customize', 'Edit axis, curve and image parameters',
          'qt4_editor_options', 'edit_parameters'))
-    # toolitems.insert(
-    #     # Add 'customize' action after 'subplots'
-    #     [name for name, *_ in toolitems].index('Customize') + 1,
-    #     ('DataLabel', 'Data label button',
-    #      'datalabel', 'on_datalabel'))
+    toolitems.insert(
+        # Add 'customize' action after 'subplots'
+        [name for name, *_ in toolitems].index('Customize') + 1,
+        ('DataLabel', 'Data label button',
+         'datalabel', 'on_datalabel'))
 
     def __init__(self, canvas, coordinates=True, *, style=wx.TB_BOTTOM):
-        super(NavigationToolbar, self).__init__(canvas,
-                                                coordinates,
-                                                style=style)
-        self._id_scroll = self.canvas.mpl_connect('scroll_event', self.do_scrollZoom)
+        wx.ToolBar.__init__(self, canvas.GetParent(), -1, style=style)
+        if wx.Platform == '__WXMAC__':
+            self.SetToolBitmapSize(self.GetToolBitmapSize()*self.GetDPIScaleFactor())
+
+        self.wx_ids = {}
+        for text, tooltip_text, image_file, callback in self.toolitems:
+            if text is None:
+                self.AddSeparator()
+                continue
+            self.wx_ids[text] = (
+                self.AddTool(
+                    -1,
+                    bitmap=self._icon(f"{image_file}.svg"),
+                    bmpDisabled=wx.NullBitmap,
+                    label=text, shortHelp=tooltip_text,
+                    kind=(wx.ITEM_CHECK if text in ("Pan", "Zoom", "DataLabel")
+                          else wx.ITEM_NORMAL))
+                .Id)
+            self.Bind(wx.EVT_TOOL, getattr(self, callback),
+                      id=self.wx_ids[text])
+
+        self._coordinates = coordinates
+        if self._coordinates:
+            self.AddStretchableSpace()
+            self._label_text = wx.StaticText(self, style=wx.ALIGN_RIGHT)
+            self.AddControl(self._label_text)
+            self._label_text.SetLabel('(x=-0.000 y=-0.000)')
+
+        self.Realize()
+
+        super(NavigationToolbar2WxAgg, self).__init__(canvas)
         self._on_scroll = False
         self._slen0 = 19
         self._annotation = None
         self._annotation_visible = False
         self._old_annotation_info = (None, None, None)
-        if self._coordinates:
-            self._label_text.SetLabel('(x=-0.000 y=-0.000)')
+        self._id_scroll = self.canvas.mpl_connect('scroll_event', self.do_scrollZoom)
+        # for text in self.wx_ids:
+        #     self.DeleteTool(self.wx_ids[text])
+        # self.wx_ids = {}
+        # for i, (text, tooltip_text, image_file, callback) in enumerate(self.toolitems):
+        #     if text is None:
+        #         self.InsertSeparator(i)
+        #         continue
+        #     self.wx_ids[text] = (
+        #         self.InsertTool(
+        #             i,
+        #             -1,
+        #             bitmap=self._icon(f"{image_file}.svg"),
+        #             bmpDisabled=wx.NullBitmap,
+        #             label=text, shortHelp=tooltip_text,
+        #             kind=(wx.ITEM_CHECK if text in ("Pan", "Zoom", "DataLabel")
+        #                   else wx.ITEM_NORMAL))
+        #         .Id)
+        #     self.Bind(wx.EVT_TOOL, getattr(self, callback),
+        #               id=self.wx_ids[text])
+        # self.Realize()
 
-        self.wx_ids['DataLabel'] = (
-                self.InsertTool(
-                    len(self.toolitems)-2,
-                    -1,
-                    label='DataLabel',
-                    bitmap=self._load_datalabel_svg(),
-                    bmpDisabled=wx.NullBitmap,
-                    shortHelp='Displays data labels near the mouse',
-                    kind=wx.ITEM_CHECK).Id)
-        self.Bind(wx.EVT_TOOL, self.on_datalabel,
-                  id=self.wx_ids['DataLabel'])
-        self.Realize()
-
-    def _load_datalabel_svg(self):
+    @staticmethod
+    def _icon(name):
+        """
+        Construct a `wx.Bitmap` suitable for use as icon from an image file
+        *name*, including the extension and relative to Matplotlib's "images"
+        data directory.
+        """
         try:
             dark = wx.SystemSettings.GetAppearance().IsDark()
         except AttributeError:  # wxpython < 4.1
@@ -99,13 +140,26 @@ class NavigationToolbar(NavigationToolbar2WxAgg):
             bg_lum = (.299 * bg.red + .587 * bg.green + .114 * bg.blue) / 255
             fg_lum = (.299 * fg.red + .587 * fg.green + .114 * fg.blue) / 255
             dark = fg_lum - bg_lum > .2
-
-        with open(os.path.join(os.path.dirname(__file__), 'datalabel.svg'), 'rb') as f:
-            svg = f.read()
-        if dark:
-            svg = svg.replace(b'fill:black;', b'fill:white;')
-        toolbarIconSize = wx.ArtProvider().GetDIPSizeHint(wx.ART_TOOLBAR)
-        return wx.BitmapBundle.FromSVG(svg, toolbarIconSize)
+        if name  == 'datalabel.svg':
+            path = Path(Path(__file__).parent, name)
+        else:
+            path = cbook._get_data_path('images', name)
+        if path.suffix == '.svg':
+            svg = path.read_bytes()
+            if dark:
+                svg = svg.replace(b'fill:black;', b'fill:white;')
+            toolbarIconSize = wx.ArtProvider().GetDIPSizeHint(wx.ART_TOOLBAR)
+            return wx.BitmapBundle.FromSVG(svg, toolbarIconSize)
+        else:
+            pilimg = PIL.Image.open(path)
+            # ensure RGBA as wx BitMap expects RGBA format
+            image = np.array(pilimg.convert("RGBA"))
+            if dark:
+                fg = wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT)
+                black_mask = (image[..., :3] == 0).all(axis=-1)
+                image[black_mask, :3] = (fg.Red(), fg.Green(), fg.Blue())
+            return wx.Bitmap.FromBufferRGBA(
+                image.shape[1], image.shape[0], image.tobytes())
 
     def configure_subplots(self, *args):  # 替换 SubplotTool 增加tight_layout按钮
         if hasattr(self, 'subplot_tool'):

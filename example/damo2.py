@@ -18,7 +18,7 @@ y1 = np.sin(x)
 y2 = np.cos(x)
 
 ax.plot(x, y1, label='sin')
-ax.plot(x, y2, lebel='cos')
+ax.plot(x, y2, label='cos')
 ax.grid(ls='--', color='k', alpha=0.5)
 
 app = wx.App()
