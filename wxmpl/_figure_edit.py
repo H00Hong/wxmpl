@@ -7,9 +7,27 @@ from matplotlib import colors as mcolors
 from matplotlib import image as mimage
 from matplotlib import markers
 from matplotlib.dates import DateConverter, num2date
-from matplotlib.backends.qt_editor.figureoptions import LINESTYLES, DRAWSTYLES, MARKERS
+# from matplotlib.backends.qt_editor.figureoptions import LINESTYLES, DRAWSTYLES, MARKERS
 
 from ._canvas_dialog import ComboDialog, FormDialog
+
+LINESTYLES = {
+    '-': 'Solid',
+    '--': 'Dashed',
+    '-.': 'DashDot',
+    ':': 'Dotted',
+    'None': 'None',
+}
+
+DRAWSTYLES = {
+    'default': 'Default',
+    'steps-pre': 'Steps (Pre)',
+    'steps': 'Steps (Pre)',
+    'steps-mid': 'Steps (Mid)',
+    'steps-post': 'Steps (Post)'
+}
+
+MARKERS = markers.MarkerStyle.markers
 
 
 def figure_edit(axes, parent=None):
@@ -95,19 +113,15 @@ def figure_edit(axes, parent=None):
                                             line.get_alpha()),
                             keep_alpha=True)
         curvedata = [
-            ('Label', label),
-            sep,
-            (None, '<b>Line</b>'),
+            ('Label', label), sep, (None, '<b>Line</b>'),
             ('Line style', prepare_data(LINESTYLES, line.get_linestyle())),
             ('Draw style', prepare_data(DRAWSTYLES, line.get_drawstyle())),
-            ('Width', line.get_linewidth()),
-            ('Color (RGBA)', color),
-            sep,
+            ('Width', line.get_linewidth()), ('Color (RGBA)', color), sep,
             (None, '<b>Marker</b>'),
             ('Style', prepare_data(MARKERS, line.get_marker())),
-            ('Size', line.get_markersize()),
-            ('Face color (RGBA)', fc),
-            ('Edge color (RGBA)', ec)]
+            ('Size', line.get_markersize()), ('Face color (RGBA)', fc),
+            ('Edge color (RGBA)', ec)
+        ]
         curves.append([curvedata, label, ""])
     # Is there a curve displayed?
     has_curve = bool(curves)

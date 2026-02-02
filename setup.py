@@ -3,7 +3,7 @@
 # python setup.py bdist_wheel
 setup(
     name='wxmpl',  # 你的包名
-    version='1.1.20250618',  # 版本号
+    version='1.1.20260202',  # 版本号
     author='Yifan Hong',  # 作者名字
     author_email='hong.yf@qq.com',  # 作者邮箱
     description=
