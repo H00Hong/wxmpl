@@ -4,10 +4,20 @@ from numbers import Integral, Real
 from typing import List, Literal, Tuple
 
 import wx
-from matplotlib import cbook
+from matplotlib import cbook, font_manager
 from matplotlib.colors import Colormap
 
-FONTINFO: wx.FontInfo = wx.FontInfo(12).FaceName('Microsoft Yahei')
+
+_fonts = set(f.name for f in font_manager.fontManager.ttflist)
+ii = None
+for i in ('Sarasa Mono SC', 'Source Han Sans CN', 'Microsoft Yahei', 'SimHei'):
+    if i in _fonts:
+        ii = i
+        break
+FONTINFO = wx.FontInfo(12)
+if ii is not None:
+    FONTINFO = FONTINFO.FaceName(ii)
+# FONTINFO: wx.FontInfo = wx.FontInfo(12).FaceName('Microsoft Yahei')
 
 
 class ComboDialog(wx.Dialog):  # 选择视图
